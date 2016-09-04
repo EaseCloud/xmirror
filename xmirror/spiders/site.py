@@ -93,7 +93,7 @@ class SiteSpider(scrapy.Spider):
         domain = url_info.netloc
         path = url_info.path
 
-        dir_root = self.settings.get('DIR_ROOT') + '/' + domain
+        dir_root = self.settings.get('DIR_ROOT')  # + '/' + domain
 
         # 除了各种认可的静态类型外，其余均作为目录名内嵌 index.html 处理
         if re.search(r'\.(?:js|css|png|jpg|gif|ico|bmp'
@@ -101,7 +101,7 @@ class SiteSpider(scrapy.Spider):
                      r'|zip|txt|svg|eot|woff|ttf|otf|xml|html?)(?:\?|$)', path):
             full_path = dir_root + path
         else:
-            full_path = dir_root + re.sub('/$', '', path) + '/index.html'
+            full_path = dir_root + re.sub(r'/$', '', path) + '/index.html'
 
         # url 转义还原
         full_path = unquote(full_path)
@@ -149,7 +149,7 @@ class SiteSpider(scrapy.Spider):
     def parse_html(self, response):
 
         # 抓取样式里面的 url
-        for href in re.findall('url\(([^)]+)\)',
+        for href in re.findall(r'url\(([^)]+)\)',
                                response.body.decode('utf8', 'ignore')):
             yield self.get_request(response, href)
 
@@ -167,7 +167,7 @@ class SiteSpider(scrapy.Spider):
 
     def parse_css(self, response):
         body = response.body.decode('utf8', 'ignore')
-        for href in re.findall('url\(\'+?([^)]+)\'+?\)', body):
+        for href in re.findall(r'url\(\'?([^)]+)\'?\)', body):
             yield self.get_request(response, href)
 
     def parse_script(self, response):
