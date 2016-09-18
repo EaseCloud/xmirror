@@ -98,7 +98,7 @@ class SiteSpider(scrapy.Spider):
         # 除了各种认可的静态类型外，其余均作为目录名内嵌 index.html 处理
         if re.search(r'\.(?:js|css|png|jpg|gif|ico|bmp'
                      r'|pdf|docx?|xlsx?|pptx?'
-                     r'|zip|txt|svg|eot|woff|ttf|otf|xml|html?)(?:\?|$)', path):
+                     r'|zip|txt|svg|eot|woff|ttf|otf|xml|xsl|html?)(?:\?|$)', path):
             full_path = dir_root + path
         else:
             full_path = dir_root + re.sub(r'/$', '', path) + '/index.html'
@@ -143,6 +143,9 @@ class SiteSpider(scrapy.Spider):
         if re.search(r'\.css$', full_path):
             return self.parse_css(response)
 
+        if re.search(r'\.xml$', full_path):
+            return self.parse_xml(response)
+
         if re.search(r'<body', body):
             return self.parse_html(response)
 
@@ -161,7 +164,14 @@ class SiteSpider(scrapy.Spider):
             yield self.get_request(response, href)
 
     def parse_xml(self, response):
-        return
+
+        body = response.body.decode('utf8', 'ignore')
+
+        for href in re.findall('<loc>(.+)</loc>', body):
+            yield self.get_request(response, href)
+
+        for href in re.findall('href="([^"]+)"', body):
+            yield self.get_request(response, href)
 
     def parse_binary(self, response):
         return
