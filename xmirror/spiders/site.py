@@ -116,7 +116,7 @@ class SiteSpider(scrapy.Spider):
 
         # 获取静态化文件存储目录
         full_path = self.get_storage_path(response)
-        print(full_path, os.path.exists(full_path))
+        print('SAVE TO: %s' % os.path.abspath(full_path))
 
         try:
             # 创建对应的文件夹路径
@@ -148,9 +148,10 @@ class SiteSpider(scrapy.Spider):
 
     def parse_html(self, response):
 
+        body = response.body.decode('utf8', 'ignore')
+
         # 抓取样式里面的 url
-        for href in re.findall(r'url\(([^)]+)\)',
-                               response.body.decode('utf8', 'ignore')):
+        for href in re.findall(r'url\([\'"]?([^)\'"]+)[\'"]?\)', body):
             yield self.get_request(response, href)
 
         for href in response.xpath('//@src').extract():
@@ -166,8 +167,10 @@ class SiteSpider(scrapy.Spider):
         return
 
     def parse_css(self, response):
+
         body = response.body.decode('utf8', 'ignore')
-        for href in re.findall(r'url\(\'?([^)]+)\'?\)', body):
+
+        for href in re.findall(r'url\([\'"]?([^)\'"]+)[\'"]?\)', body):
             yield self.get_request(response, href)
 
     def parse_script(self, response):
