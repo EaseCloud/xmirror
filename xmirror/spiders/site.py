@@ -157,20 +157,23 @@ class SiteSpider(scrapy.Spider):
         for href in re.findall(r'url\([\'"]?([^)\'"]+)[\'"]?\)', body):
             yield self.get_request(response, href)
 
-        for href in response.xpath('//@src').extract():
+        for href in re.findall(r'(?:href|src)="([^"]+)"', body):
             yield self.get_request(response, href)
 
-        for href in response.xpath('//@href').extract():
-            yield self.get_request(response, href)
+        # for href in response.xpath('//@src').extract():
+        #     yield self.get_request(response, href)
+        #
+        # for href in response.xpath('//@href').extract():
+        #     yield self.get_request(response, href)
 
     def parse_xml(self, response):
 
         body = response.body.decode('utf8', 'ignore')
 
-        for href in re.findall('<loc>(.+)</loc>', body):
+        for href in re.findall(r'<loc>(.+)</loc>', body):
             yield self.get_request(response, href)
 
-        for href in re.findall('href="([^"]+)"', body):
+        for href in re.findall(r'href="([^"]+)"', body):
             yield self.get_request(response, href)
 
     def parse_binary(self, response):
