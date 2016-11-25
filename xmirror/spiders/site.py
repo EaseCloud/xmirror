@@ -160,6 +160,9 @@ class SiteSpider(scrapy.Spider):
         for href in re.findall(r'(?:href|src)="([^"]+)"', body):
             yield self.get_request(response, href)
 
+        for href in re.findall(r'(?:href|src)=\'([^\']+)"', body):
+            yield self.get_request(response, href)
+
         # for href in response.xpath('//@src').extract():
         #     yield self.get_request(response, href)
         #
