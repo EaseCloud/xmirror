@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import os
-import os.path
+import os import os.path
 import re
 from urllib.parse import unquote
 import scrapy
@@ -157,10 +156,7 @@ class SiteSpider(scrapy.Spider):
         for href in re.findall(r'url\([\'"]?([^)\'"]+)[\'"]?\)', body):
             yield self.get_request(response, href)
 
-        for href in re.findall(r'(?:href|src)="([^"]+)"', body):
-            yield self.get_request(response, href)
-
-        for href in re.findall(r'(?:href|src)=\'([^\']+)"', body):
+        for href in re.findall(r'(?:href|src)=[\'"]([^\'"]+)[\'"]', body):
             yield self.get_request(response, href)
 
         # for href in response.xpath('//@src').extract():
@@ -176,7 +172,7 @@ class SiteSpider(scrapy.Spider):
         for href in re.findall(r'<loc>(.+)</loc>', body):
             yield self.get_request(response, href)
 
-        for href in re.findall(r'href="([^"]+)"', body):
+        for href in re.findall(r'(?:href|src)=[\'"]([^\'"]+)[\'"]', body):
             yield self.get_request(response, href)
 
     def parse_binary(self, response):
