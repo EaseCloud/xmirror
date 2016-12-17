@@ -110,6 +110,10 @@ class SiteSpider(scrapy.Spider):
 
     def parse(self, response):
 
+        if not self.check_url(response.url):
+            print('XXXXXXXX FATAL: {}'.format(response.url))
+            return
+
         print('>>>>>>>> ' + unquote(response.url))
 
         # ==== 1. 存储文件内容 ====
