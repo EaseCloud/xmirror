@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os 
+import os
 import os.path
 import re
 from urllib.parse import unquote
@@ -81,15 +81,15 @@ class SiteSpider(scrapy.Spider):
             url = response.urljoin(url)
             return scrapy.Request(url, callback=self.parse)
 
-    def get_storage_path(self, response):
+    def get_storage_path(self, url):
         """
         根据文件类型生成存储路径
-        :param response:
+        :param url:
         :return:
         """
 
         from urllib.parse import urlparse
-        url_info = urlparse(response.url)
+        url_info = urlparse(url)
         domain = url_info.netloc
         path = url_info.path
 
@@ -115,11 +115,12 @@ class SiteSpider(scrapy.Spider):
             return
 
         print('>>>>>>>> ' + unquote(response.url))
+        self.save_redirects(response)
 
         # ==== 1. 存储文件内容 ====
 
         # 获取静态化文件存储目录
-        full_path = self.get_storage_path(response)
+        full_path = self.get_storage_path(response.url)
         print('SAVE TO: %s' % os.path.abspath(full_path))
 
         try:
@@ -192,3 +193,15 @@ class SiteSpider(scrapy.Spider):
 
     def parse_script(self, response):
         return
+
+    def save_redirects(self, response):
+        for from_301_url in response.request.meta.get('redirect_urls', []):
+            from_path = os.path.abspath(self.get_storage_path(from_301_url))
+            from urllib.parse import urlsplit
+            to_path = response.url
+            print('  301 FROM -- ', from_301_url)
+            print('      from >', from_path, ': to >', to_path)
+            os.makedirs(os.path.dirname(from_path), 0o777, True)
+            with open(from_path, 'w') as f:
+                f.write(('<html><head><meta http-equiv="refresh" content="0; url={}" /></head>'
+                         '<body>Redirect..</body></html>').format(urlsplit(to_path).path))

@@ -176,5 +176,6 @@ ENV/
 
 # -------------------
 /export
+/static
 /.idea
 /script.sh
