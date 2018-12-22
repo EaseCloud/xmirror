@@ -198,10 +198,9 @@ class SiteSpider(scrapy.Spider):
         for from_301_url in response.request.meta.get('redirect_urls', []):
             from_path = os.path.abspath(self.get_storage_path(from_301_url))
             from urllib.parse import urlsplit
-            to_path = response.url
-            print('  301 FROM -- ', from_301_url)
-            print('      from >', from_path, ': to >', to_path)
+            to_path = urlsplit(response.url).path
+            print('  [301] from >', from_path, ': to >', to_path)
             os.makedirs(os.path.dirname(from_path), 0o777, True)
             with open(from_path, 'w') as f:
                 f.write(('<html><head><meta http-equiv="refresh" content="0; url={}" /></head>'
-                         '<body>Redirect..</body></html>').format(urlsplit(to_path).path))
+                         '<body>Redirect..</body></html>').format(to_path))
