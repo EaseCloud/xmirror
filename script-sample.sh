@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 DOMAIN=example.com
 SITE_ROOT=http://$DOMAIN
 
